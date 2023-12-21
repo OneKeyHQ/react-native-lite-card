@@ -1,7 +1,7 @@
 export type Callback<T> = (
   error: CallbackError | null,
   data: T | null,
-  state: CardInfo | null,
+  state: CardInfo | null
 ) => void;
 
 export type CallbackError = { code: number; message: string | null } | null;
