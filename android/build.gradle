@@ -44,12 +44,18 @@ def supportsNamespace() {
 
 android {
   if (supportsNamespace()) {
-    namespace "com.litecard"
+    namespace "so.onekey.app.wallet"
 
     sourceSets {
       main {
         manifest.srcFile "src/main/AndroidManifestNew.xml"
       }
+    }
+  }
+
+  externalNativeBuild {
+    cmake {
+        path "src/main/cpp/CMakeLists.txt"
     }
   }
 

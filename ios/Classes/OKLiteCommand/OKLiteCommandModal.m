@@ -108,7 +108,7 @@
         case OKLiteCommandWipeCard:
             return [OKNFCBridge buildAPDUWith_cla:0x80 ins:0xcb p1:0x80 p2:0x00 data:@"dffe028205" encrypt:YES];
         case OKLiteCommandOpenChannel_1:
-            return [OKNFCBridge buildAPDUWithStr:[@"0x802a1810XX" stringByAppendingString:[NFCConfig envFor:@"LITE_CERT"]] encrypt:NO];
+            return [OKNFCBridge buildAPDUWithStr:[@"0x802a1810XX" stringByAppendingString:[NFCConfig envFor:@"crt"]] encrypt:NO];
         case OKLiteCommandOpenChannel_2:
             return [OKNFCBridge buildAPDUWithStr:[@"0x80821815XX" stringByAppendingString:[OKNFCBridge mutualAuthData]] encrypt:NO];
         default:

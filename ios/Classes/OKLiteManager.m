@@ -211,7 +211,7 @@ RCT_EXPORT_METHOD(reset:(RCTResponseSenderBlock)callBack)
     callback(@[@{@"code":@(NFCLiteExceptionsNotNFCPermission),@"message":@""},[NSNull null],[NSNull null]]);
     return NO;
   }
-  if ([NFCConfig envFor:@"LITE_CERT"].length > 0 && [NFCConfig envFor:@"NFCSK"].length > 0) {
+  if ([NFCConfig envFor:@"crt"].length > 0 && [NFCConfig envFor:@"sk"].length > 0) {
     return YES;
   }
   callback(@[@{@"code":@(NFCLiteExceptionsInitChannel),@"message":@""},[NSNull null],[NSNull null]]);

@@ -3,6 +3,7 @@ package so.onekey.app.wallet.onekeyLite.nfc
 import android.nfc.tech.IsoDep
 import org.haobtc.onekey.card.gpchannel.GPChannelNatives
 import org.haobtc.onekey.card.gpchannel.GPChannelNatives.nativeGPCFinalize
+import so.onekey.app.wallet.keys.KeysNativeProvider
 import so.onekey.app.wallet.nfc.NFCExceptions
 import so.onekey.app.wallet.onekeyLite.NfcConstant
 import so.onekey.app.wallet.onekeyLite.entitys.*
@@ -134,8 +135,7 @@ class Connection(val isoDep: IsoDep, private val mCommandGenerator: CommandGener
 
         printLog(TAG, "1. ---> nativeGPCInitialize begin")
         val param = SecureChanelParam.objectFromData(
-        	""
-//            KeysNativeProvider().getLiteSecureChannelInitParams(Utils.getApp())
+        	KeysNativeProvider().getLiteSecureChannelInitParams(Utils.getApp())
         )
         param.cardGroupID = certInfo.subjectID
         printLog(TAG, "nativeGPCInitialize read param done")
