@@ -1,11 +1,13 @@
 #import "NFCConfig.h"
-//#import "RNCConfig.h"
+#import "keys.h"
 
 @implementation NFCConfig
 
 + (NSDictionary *)env {
-    return @{};
-//  return [RNCConfig env];
+    char *result = getInitParams();
+    NSData *data = [NSData dataWithBytesNoCopy:result length:strlen(result) freeWhenDone:YES];
+    NSDictionary *value = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:NULL];
+    return value;
 }
 
 + (NSString *)envFor: (NSString *)key {

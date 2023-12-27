@@ -174,9 +174,9 @@
     shareInfo.cardGroupID = subjectID;
 
     // initParams.json -> sk
-    char *sk = (char *)[[NFCConfig envFor:@"NFCSK"] UTF8String];
+    char *sk = (char *)[[NFCConfig envFor:@"sk"] UTF8String];
 
-    rv = JUB_GPC_Initialize(shareInfo, [NFCConfig envFor:@"LITE_CERT"].UTF8String, sk);
+    rv = JUB_GPC_Initialize(shareInfo, [NFCConfig envFor:@"crt"].UTF8String, sk);
 
     if (JUBR_OK != rv) {
         return NO;
