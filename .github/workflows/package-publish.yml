@@ -12,11 +12,10 @@ jobs:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Install Package
-        run: |
-          yarn
+        run: yarn
+      - name: Build
+        run: yarn prepare
       - name: Publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          yarn release
+        run: echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc && npm publish
