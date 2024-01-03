@@ -1,5 +1,5 @@
 {
-  "name": "react-native-lite-card",
+  "name": "@onekeyfe/react-native-lite-card",
   "version": "1.0.0",
   "description": "lite card",
   "main": "lib/commonjs/index",
