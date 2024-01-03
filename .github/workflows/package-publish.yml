@@ -11,6 +11,7 @@ jobs:
         with:
           node-version: '18.x'
           registry-url: 'https://registry.npmjs.org'
+          scope: '@onekeyfe'
       - name: Install Package
         run: yarn
       - name: Build
