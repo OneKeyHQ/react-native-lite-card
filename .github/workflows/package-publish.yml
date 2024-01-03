@@ -18,4 +18,4 @@ jobs:
       - name: Publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: yarn publish-packages -y --no-verify-access
+        run: npm publish
