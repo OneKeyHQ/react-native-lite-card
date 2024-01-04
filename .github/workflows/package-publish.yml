@@ -20,4 +20,4 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm whoami && yarn npm publish
+        run: npm whoami && yarn npm publish --access public
