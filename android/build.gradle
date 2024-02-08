@@ -44,7 +44,7 @@ def supportsNamespace() {
 
 android {
   if (supportsNamespace()) {
-    namespace "so.onekey.app.wallet"
+    namespace "so.onekey.app.wallet.lite"
 
     sourceSets {
       main {
