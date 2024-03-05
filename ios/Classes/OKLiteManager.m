@@ -38,26 +38,12 @@ RCT_EXPORT_MODULE();
 RCT_EXPORT_METHOD(checkNFCPermission:(RCTResponseSenderBlock)callback)
 {
   BOOL permission = [NFCNDEFReaderSession readingAvailable];
-  if (![NFCNDEFReaderSession readingAvailable]) {
-    callback(@[[NSNull null],@(permission),[NSNull null]]);
+  if (permission) {
+  	callback(@[[NSNull null],@(permission),[NSNull null]]);
+  } else {
+  	callback(@[@{@"code":@(NFCLiteExceptionsNotExistsNFC),@"message":@""},[NSNull null],[NSNull null]]);
   }
-}
-
-RCT_EXPORT_METHOD(getCardName:(RCTResponseSenderBlock)callBack)
-{
-  if ([OKLiteManager checkSDKVaild:callBack]) {
-    __block OKNFCManager *liteManager = [[OKNFCManager alloc] init];
-    [liteManager getLiteInfo:^(OKLiteV1 *lite, OKNFCLiteStatus status) {
-      NSDictionary *cardInfo = [lite cardInfo];
-      BOOL error = status == OKNFCLiteStatusError || status == OKNFCLiteStatusSNNotMatch;
-      if (error) {
-        callBack(@[@{@"code":@(NFCLiteExceptionsConnectionFail),@"message":@""},[NSNull null],[NSNull null]]);
-      } else {
-        callBack(@[[NSNull null],lite.SN,cardInfo]);
-      }
-      liteManager = nil;
-    }];
-  }
+  
 }
 
 RCT_EXPORT_METHOD(getLiteInfo:(RCTResponseSenderBlock)callBack)

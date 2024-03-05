@@ -1,4 +1,9 @@
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import {
+  Linking,
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+} from 'react-native';
 
 import { CardErrors } from './types';
 
@@ -6,76 +11,17 @@ import type { Callback, CallbackError, CardInfo } from './types';
 
 const { OKLiteManager } = NativeModules;
 
-export const LiteFlag = {
-  VERSION: '01',
-  LANGUAGE: '00', // english
-  TAG: 'ffff',
-};
-
 export type NfcConnectUiState = {
   code: number;
   message: string;
 };
 
-const DEFAULT_FUNCTION = (value: string) => value;
-
 class OnekeyLite {
   UiEventEmitter: NativeEventEmitter | null = null;
-
-  mnemonicToEntropy = DEFAULT_FUNCTION;
-
-  entropyToMnemonic = DEFAULT_FUNCTION;
-  entropyToMnemonicV2 = DEFAULT_FUNCTION;
 
   constructor() {
     if (Platform.OS !== 'android') return;
     this.UiEventEmitter = new NativeEventEmitter(OKLiteManager);
-  }
-
-  async encodeMnemonic(
-    version: string,
-    language: string,
-    mnemonic: string
-  ): Promise<string> {
-    const meta = LiteFlag.TAG + version + language;
-    const enMnemonic = await this.mnemonicToEntropy(mnemonic.trim()); // mnemonic to index
-    return enMnemonic + meta;
-  }
-
-  async decodeMnemonic(payload: string) {
-    try {
-      if (payload.length <= 8)
-        return Buffer.from(payload, 'hex').toString().trim();
-
-      const meta = payload.slice(-8);
-
-      const regexp = /^ffff[a-f0-9]{4}$/;
-      if (regexp.test(meta)) {
-        const version = parseInt(meta.slice(4, 6), 10);
-        const enMnemonic = payload.slice(0, -8);
-
-        if (version === 1) {
-          const deMnemonic = await this.entropyToMnemonic(enMnemonic); // mnemonic to index
-
-          return deMnemonic.trim();
-        }
-
-        if (version === 2) {
-          const deMnemonic = await this.entropyToMnemonicV2(enMnemonic); // mnemonic to index
-
-          return deMnemonic.trim();
-        }
-
-        // 当前版本不支持
-        return '';
-      }
-
-      // 兼容 V0 旧版本
-      return Buffer.from(payload, 'hex').toString().trim();
-    } catch (error) {
-      // 数据解析报错
-      return '';
-    }
   }
 
   addConnectListener(listener: (event: NfcConnectUiState) => void) {
@@ -93,10 +39,6 @@ class OnekeyLite {
     return eventEmitter.addListener('nfc_active_connection', () => {});
   }
 
-  getCardName(result: Callback<string>) {
-    OKLiteManager.getCardName(result);
-  }
-
   getLiteInfo(result: Callback<CardInfo>) {
     OKLiteManager.getLiteInfo(result);
   }
@@ -111,9 +53,7 @@ class OnekeyLite {
     result: Callback<boolean>,
     overwrite = false
   ) {
-    this.encodeMnemonic(LiteFlag.VERSION, LiteFlag.LANGUAGE, mnemonic).then(
-      (payload) => OKLiteManager.setMnemonic(payload, pwd, overwrite, result)
-    );
+    OKLiteManager.setMnemonic(mnemonic, pwd, overwrite, result);
   }
 
   getMnemonicWithPin(pwd: string, result: Callback<string>) {
@@ -125,7 +65,7 @@ class OnekeyLite {
           data: string | null,
           state: CardInfo | null
         ) => {
-          result(error, data ? await this.decodeMnemonic(data) : null, state);
+          result(error, data ? await data : null, state);
         }
       );
     } catch (error) {
@@ -146,7 +86,11 @@ class OnekeyLite {
   }
 
   intoSetting() {
-    if (Platform.OS === 'android') OKLiteManager.intoSetting();
+    if (Platform.OS === 'android') {
+      OKLiteManager.intoSetting();
+    } else {
+      Linking.openSettings();
+    }
   }
 }
 

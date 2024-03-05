@@ -92,15 +92,6 @@ object OneKeyLiteCard {
     }
 
     @Throws(NFCExceptions::class)
-    fun getCardName(isoDep: IsoDep): String {
-        val cardInfo = mCardConnection?.getSerialNumber()
-        if (cardInfo.isNullOrEmpty() || cardInfo == NfcConstant.NOT_MATCH_DEVICE) {
-            throw NFCExceptions.InterruptException()
-        }
-        return cardInfo
-    }
-
-    @Throws(NFCExceptions::class)
     fun getCardInfo(isoDep: IsoDep): CardState {
         return mCardConnection?.getCardInfo() ?: throw NFCExceptions.ConnectionFailException()
     }

@@ -46,6 +46,7 @@ class OKLiteManager(private val context: ReactApplicationContext) :
     }
 
     private val mNFCConnectedChannel = Channel<IsoDep?>(1)
+    private var lastIsoDep: IsoDep? = null
     private val mNFCState = AtomicInteger(NFCState.Dead)
     private val mShowDialogNumber = AtomicInteger(0)
     private var mCurrentCardState: CardState? = null
@@ -78,7 +79,7 @@ class OKLiteManager(private val context: ReactApplicationContext) :
                         delay(100)
                         if (!mNFCConnectedChannel.isEmpty) {
                             Log.e(TAG, "There is no way to use NFC")
-                            mNFCConnectedChannel.receive()
+//                            mNFCConnectedChannel.receive()
                             val startRequest = OneKeyLiteCard.initRequest(isoDep)
                             val dataMap = Arguments.createMap().apply {
                                 putInt("code", -1)
@@ -118,11 +119,11 @@ class OKLiteManager(private val context: ReactApplicationContext) :
             mNfcStateBroadcastReceiver,
             NfcStatusChangeBroadcastReceiver.nfcBroadcastReceiverIntentFilter
         )
-      Utils.getTopActivity()?.let {
-        launch(Dispatchers.IO) {
-          OneKeyLiteCard.startNfc(it as FragmentActivity) {}
+        Utils.getTopActivity()?.let {
+            launch(Dispatchers.IO) {
+                OneKeyLiteCard.startNfc(it as FragmentActivity) {}
+            }
         }
-      }
 
     }
 
@@ -211,11 +212,14 @@ class OKLiteManager(private val context: ReactApplicationContext) :
             it.putString("message", "show_connect_ui")
         })
         mShowDialogNumber.incrementAndGet()
-        if (!mNFCConnectedChannel.isEmpty) {
-            mNFCConnectedChannel.tryReceive()
+        var receiveIsoDep = lastIsoDep
+        val tryReceiveResult = mNFCConnectedChannel.tryReceive()
+        if (tryReceiveResult.isSuccess) {
+            receiveIsoDep = tryReceiveResult.getOrNull();
+        } else if (lastIsoDep == null || lastIsoDep?.isConnected == false) {
+            receiveIsoDep = mNFCConnectedChannel.receive()
         }
-        val receiveIsoDep = mNFCConnectedChannel.receive()
-        mCurrentCardState = null
+        lastIsoDep = receiveIsoDep
         if (receiveIsoDep == null) {
             // 取消连接
             releaseDevice()
@@ -259,27 +263,7 @@ class OKLiteManager(private val context: ReactApplicationContext) :
         callback: Callback,
         execute: (isoDep: IsoDep) -> T
     ) {
-        val topActivity = Utils.getTopActivity()
-        if (topActivity == null) {
-            callback.invoke(NFCExceptions.InitializedException().createArguments(), null, null)
-            return
-        }
-        val isNfcExists = NfcUtils.isNfcExits(topActivity)
-        if (!isNfcExists) {
-            // 没有 NFC 设备
-            Log.d(TAG, "NFC device not found")
-            callback.invoke(NFCExceptions.NotExistsNFC().createArguments(), null, null)
-            return
-        }
-
-        val isNfcEnable = NfcUtils.isNfcEnable(topActivity)
-        if (!isNfcEnable) {
-            // 没有打开 NFC 开关
-            Log.d(TAG, "NFC device not enable")
-            callback.invoke(NFCExceptions.NotEnableNFC().createArguments(), null, null)
-            return
-        }
-
+        val topActivity = Utils.getTopActivity() ?: return
         NfcPermissionUtils.checkPermission(topActivity) {
             try {
                 Log.d(TAG, "NFC permission check success")
@@ -325,17 +309,6 @@ class OKLiteManager(private val context: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun getCardName(callback: Callback) = launch {
-        Log.d(TAG, "getCardName")
-        handleOperation(callback) { isoDep ->
-            Log.e(TAG, "getCardName Obtain the device")
-            val cardName = OneKeyLiteCard.getCardName(isoDep)
-            Log.e(TAG, "getCardName result $cardName")
-            cardName
-        }
-    }
-
-    @ReactMethod
     fun getLiteInfo(callback: Callback) = launch {
         Log.d(TAG, "getLiteInfo")
         handleOperation(callback) { isoDep ->
@@ -375,6 +348,39 @@ class OKLiteManager(private val context: ReactApplicationContext) :
             Log.e(TAG, "changePin Obtain the device")
             OneKeyLiteCard.changPin(mCurrentCardState, isoDep, oldPwd, newPwd)
         }
+    }
+
+    @ReactMethod
+    fun checkNFCPermission(callback: Callback) {
+        val topActivity = Utils.getTopActivity()
+        if (topActivity == null) {
+            callback.invoke(NFCExceptions.InitializedException().createArguments(), null, null)
+            return
+        }
+        val isNfcExists = NfcUtils.isNfcExits(topActivity)
+        if (!isNfcExists) {
+            // 没有 NFC 设备
+            Log.d(TAG, "NFC device not found")
+            callback.invoke(NFCExceptions.NotExistsNFC().createArguments(), null, null)
+            return
+        }
+
+        val isNfcEnable = NfcUtils.isNfcEnable(topActivity)
+        if (!isNfcEnable) {
+            // 没有打开 NFC 开关
+            Log.d(TAG, "NFC device not enable")
+            callback.invoke(NFCExceptions.NotEnableNFC().createArguments(), null, null)
+            return
+        }
+        NfcPermissionUtils.checkPermission(topActivity) {
+            // 没有 NFC 使用权限
+            Log.d(TAG, "NFC device not permission")
+            callback.invoke(null, null, null)
+            return
+        }
+        // 没有 NFC 使用权限
+        Log.d(TAG, "NFC device not permission")
+        callback.invoke(NFCExceptions.NotNFCPermission().createArguments(), null, null)
     }
 
     @ReactMethod
