@@ -1,8 +1,14 @@
-export type Callback<T> = (
+export type CallbackResult<T> = [
   error: CallbackError | null,
   data: T | null,
-  state: CardInfo | null
-) => void;
+  cardInfo: CardInfo | null
+];
+
+export type PromiseResult<T> = {
+  error: CallbackError | null;
+  data: T | null;
+  cardInfo: CardInfo | null;
+};
 
 export type CallbackError = { code: number; message: string | null } | null;
 

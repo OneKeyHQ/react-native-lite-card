@@ -5,9 +5,7 @@ import {
   Platform,
 } from 'react-native';
 
-import { CardErrors } from './types';
-
-import type { Callback, CallbackError, CardInfo } from './types';
+import type { CallbackResult, CardInfo, PromiseResult } from './types';
 
 const { OKLiteManager } = NativeModules;
 
@@ -39,46 +37,53 @@ class OnekeyLite {
     return eventEmitter.addListener('nfc_active_connection', () => {});
   }
 
-  getLiteInfo(result: Callback<CardInfo>) {
-    OKLiteManager.getLiteInfo(result);
+  getLiteInfo() {
+    return new Promise<PromiseResult<CardInfo>>((resolve) => {
+      OKLiteManager.getLiteInfo(this.convertToPromise(resolve));
+    });
   }
 
-  checkNFCPermission(result: Callback<boolean>) {
-    OKLiteManager.checkNFCPermission(result);
+  checkNFCPermission() {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.checkNFCPermission(this.convertToPromise(resolve));
+    });
   }
 
-  setMnemonic(
-    mnemonic: string,
-    pwd: string,
-    result: Callback<boolean>,
-    overwrite = false
-  ) {
-    OKLiteManager.setMnemonic(mnemonic, pwd, overwrite, result);
-  }
-
-  getMnemonicWithPin(pwd: string, result: Callback<string>) {
-    try {
-      OKLiteManager.getMnemonicWithPin(
+  setMnemonic(mnemonic: string, pwd: string, overwrite = false) {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.setMnemonic(
+        mnemonic,
         pwd,
-        async (
-          error: CallbackError | null,
-          data: string | null,
-          state: CardInfo | null
-        ) => {
-          result(error, data ? await data : null, state);
-        }
+        overwrite,
+        this.convertToPromise(resolve)
       );
-    } catch (error) {
-      result({ code: CardErrors.ExecFailure, message: null }, null, null);
-    }
+    });
   }
 
-  changePin(oldPin: string, newPin: string, result: Callback<boolean>) {
-    OKLiteManager.changePin(oldPin, newPin, result);
+  getMnemonicWithPin(pwd: string) {
+    return new Promise<PromiseResult<string>>((resolve) => {
+      OKLiteManager.getMnemonicWithPin(pwd, this.convertToPromise(resolve));
+    });
   }
 
-  reset(result: Callback<boolean>) {
-    OKLiteManager.reset(result);
+  changePin(oldPin: string, newPin: string) {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.changePin(oldPin, newPin, this.convertToPromise(resolve));
+    });
+  }
+
+  reset() {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.reset(this.convertToPromise(resolve));
+    });
+  }
+
+  convertToPromise<T>(
+    resolve: (value: PromiseResult<T> | PromiseLike<PromiseResult<T>>) => void
+  ) {
+    return (...result: CallbackResult<T>) => {
+      resolve({ error: result[0], data: result[1], cardInfo: result[2] });
+    };
   }
 
   cancel() {
