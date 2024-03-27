@@ -1,5 +1,6 @@
 package so.onekey.app.wallet.lite.onekeyLite.nfc
 
+import android.nfc.TagLostException
 import android.nfc.tech.IsoDep
 import org.haobtc.onekey.card.gpchannel.GPChannelNatives
 import org.haobtc.onekey.card.gpchannel.GPChannelNatives.nativeGPCFinalize
@@ -42,6 +43,8 @@ class Connection(val isoDep: IsoDep, private val mCommandGenerator: CommandGener
                 val sw2 = response[response.size - 1]
 
                 return SendResponse(byteArr2HexStr(response), sw1, sw2, byteArr2HexStr(resp))
+            } catch (e: TagLostException) {
+                throw NFCExceptions.InterruptException()
             } catch (e: IOException) {
                 e.printStackTrace()
                 return SendResponse("0xFFFF", 0xFF.toByte(), 0xFF.toByte())

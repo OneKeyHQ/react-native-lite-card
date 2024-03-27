@@ -373,8 +373,6 @@ class OKLiteManager(private val context: ReactApplicationContext) :
             return
         }
         NfcPermissionUtils.checkPermission(topActivity) {
-            // 没有 NFC 使用权限
-            Log.d(TAG, "NFC device not permission")
             callback.invoke(null, null, null)
             return
         }

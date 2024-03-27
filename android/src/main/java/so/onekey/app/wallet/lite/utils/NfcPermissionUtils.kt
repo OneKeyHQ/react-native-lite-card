@@ -16,8 +16,8 @@ object NfcPermissionUtils {
 
     inline fun checkMiuiPermission(activity: Activity, doNext: () -> Unit): Int {
         when (MiUtil.checkNfcPermission(activity)) {
-            MiUtil.PermissionResult.PERMISSION_GRANTED -> doNext()
-            else -> doNext()
+            MiUtil.PermissionResult.PERMISSION_GRANTED -> doNext.invoke()
+            else -> {}
         }
         return MiUtil.checkNfcPermission(activity)
     }
