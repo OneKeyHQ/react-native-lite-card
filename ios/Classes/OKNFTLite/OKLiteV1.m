@@ -260,7 +260,7 @@
   if (status == OKNFCLiteGetMncStatusWiped) {
     self.status = OKNFCLiteStatusNewCard;
   }
-  [self.delegate endNFCSessionWithError:status == OKNFCLiteGetMncStatusError || status == OKNFCLiteGetMncStatusPinNotMatch];
+  [self.delegate endNFCSessionWithError:status == OKNFCLiteGetMncStatusError || status == OKNFCLiteGetMncStatusPinNotMatch || status == OKNFCLiteGetMncStatusWiped];
   callback(self,mnc,status);
 }
 
@@ -577,13 +577,20 @@
 }
 
 - (OKNFCLiteChangePinResult)setNewPin:(NSString *)newPin withOldPin:(NSString *)oldPin {
+  static const u_int8_t AuthenticationLockCode = 0x69;
+  static const u_int8_t AuthenticationLockSw2Code = 0x83;
+  static const u_int8_t FailedVerificationCode = 0x63;
+  static const u_int8_t PinRTLBitMask = 0x0f;
   __block OKNFCLiteChangePinResult result = OKNFCLiteChangePinResultError;
   dispatch_semaphore_t sema = dispatch_semaphore_create(0);
   OKLiteCommandModal *modal = [[OKLiteCommandModal alloc] initWithCommand:OKLiteCommandChangePIN version:self.version];
   modal.parseResp = true;
   [self.commandTool sendCommandWithAPDU:[modal changePIN:oldPin newPin:newPin] modal:modal completionHandler:^(NSData * _Nonnull responseData, uint8_t sw1, uint8_t sw2, NSError * _Nullable error, NSString * _Nonnull parseRespon) {
     if (sw1 != OKNFC_SW1_OK) {
-      if (sw1 == 0x63) {
+      if (sw1 == FailedVerificationCode) {
+        self.pinRTL = sw2 & PinRTLBitMask;
+      } else if (sw1 == AuthenticationLockCode && sw2 == AuthenticationLockSw2Code) {
+        self.pinRTL = 0;
         result = OKNFCLiteChangePinResultWiped;
       }
       dispatch_semaphore_signal(sema);
