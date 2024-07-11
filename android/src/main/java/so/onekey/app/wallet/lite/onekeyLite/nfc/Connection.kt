@@ -23,9 +23,14 @@ class Connection(val isoDep: IsoDep, private val mCommandGenerator: CommandGener
 
         @JvmStatic
         private fun connect(isoDep: IsoDep?) {
-            if (isoDep?.isConnected == false) {
-                isoDep.connect()
-                isoDep.timeout = 15000
+            val isConnected: Boolean = try {
+                isoDep?.isConnected ?: false
+            } catch (e: Exception) {
+                false
+            }
+            if (isConnected == false) {
+                isoDep?.connect()
+                isoDep?.timeout = 15000
             }
         }
 

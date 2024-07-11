@@ -214,9 +214,14 @@ class OKLiteManager(private val context: ReactApplicationContext) :
         mShowDialogNumber.incrementAndGet()
         var receiveIsoDep = lastIsoDep
         val tryReceiveResult = mNFCConnectedChannel.tryReceive()
+        val lastIsoDepIsConnected: Boolean = try {
+            lastIsoDep?.isConnected ?: false
+        } catch (e: Exception) {
+            false
+        }
         if (tryReceiveResult.isSuccess) {
             receiveIsoDep = tryReceiveResult.getOrNull();
-        } else if (lastIsoDep == null || lastIsoDep?.isConnected == false) {
+        } else if (lastIsoDepIsConnected == false) {
             receiveIsoDep = mNFCConnectedChannel.receive()
         }
         lastIsoDep = receiveIsoDep
