@@ -212,18 +212,24 @@ class OKLiteManager(private val context: ReactApplicationContext) :
             it.putString("message", "show_connect_ui")
         })
         mShowDialogNumber.incrementAndGet()
-        var receiveIsoDep = lastIsoDep
         val tryReceiveResult = mNFCConnectedChannel.tryReceive()
-        val lastIsoDepIsConnected: Boolean = try {
-            lastIsoDep?.isConnected ?: false
-        } catch (e: Exception) {
-            false
+
+        fun IsoDep?.isSafeConnected(): Boolean {
+            return runCatching { this?.isConnected ?: false }.getOrDefault(false)
         }
+        var receiveIsoDep: IsoDep? = null
+
         if (tryReceiveResult.isSuccess) {
-            receiveIsoDep = tryReceiveResult.getOrNull();
-        } else if (lastIsoDepIsConnected == false) {
-            receiveIsoDep = mNFCConnectedChannel.receive()
+            receiveIsoDep = tryReceiveResult.getOrNull()
+            if (!receiveIsoDep.isSafeConnected()) {
+                receiveIsoDep = null
+            }
         }
+        receiveIsoDep = when {
+            receiveIsoDep == null && lastIsoDep.isSafeConnected() -> lastIsoDep
+            else -> mNFCConnectedChannel.receive()
+        }
+
         lastIsoDep = receiveIsoDep
         if (receiveIsoDep == null) {
             // 取消连接
