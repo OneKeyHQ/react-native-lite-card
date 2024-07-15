@@ -225,9 +225,12 @@ class OKLiteManager(private val context: ReactApplicationContext) :
                 receiveIsoDep = null
             }
         }
-        receiveIsoDep = when {
-            receiveIsoDep == null && lastIsoDep.isSafeConnected() -> lastIsoDep
-            else -> mNFCConnectedChannel.receive()
+
+        if (receiveIsoDep == null && lastIsoDep.isSafeConnected()) {
+            receiveIsoDep = lastIsoDep
+        }
+        if (receiveIsoDep == null) {
+            receiveIsoDep = mNFCConnectedChannel.receive()
         }
 
         lastIsoDep = receiveIsoDep
