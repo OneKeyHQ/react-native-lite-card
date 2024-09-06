@@ -49,9 +49,10 @@ class Connection(val isoDep: IsoDep, private val mCommandGenerator: CommandGener
 
                 return SendResponse(byteArr2HexStr(response), sw1, sw2, byteArr2HexStr(resp))
             } catch (e: TagLostException) {
-                throw NFCExceptions.InterruptException()
+                // throw NFCExceptions.InterruptException()
+                return SendResponse("0xFFFF", 0xFF.toByte(), 0xFF.toByte())
             } catch (e: IOException) {
-                e.printStackTrace()
+                // e.printStackTrace()
                 return SendResponse("0xFFFF", 0xFF.toByte(), 0xFF.toByte())
             }
         }
