@@ -4,6 +4,7 @@ import android.app.Activity
 import android.nfc.tech.IsoDep
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,6 +39,9 @@ object OneKeyLiteCard {
 
             NfcPermissionUtils.checkPermission(activity) {
                 printLog(TAG, "startNfc Have permission")
+                if (!activity.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
+                    return@checkPermission
+                }
 
                 NfcUtils.mNfcAdapter?.enableForegroundDispatch(
                     activity, NfcUtils.mPendingIntent, NfcUtils.mIntentFilter, NfcUtils.mTechList
