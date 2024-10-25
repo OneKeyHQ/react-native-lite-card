@@ -101,15 +101,6 @@ object NfcUtils {
      * @return `true` 跳转成功 <br></br> `false` 跳转失败
      */
     fun intentToNfcSetting(context: Context): Boolean {
-        if ("Smartisan".equals(Build.MANUFACTURER, true)) {
-            if (intentToNfcShare(context)) {
-                return true
-            }
-        }
-        if ("xiaomi".equals(Build.MANUFACTURER, true)) {
-            MiUtil.intentToAppSetting(context)
-            return true
-        }
         if (isNfcExits(context)) {
             return toIntent(context, Settings.ACTION_NFC_SETTINGS)
         }
