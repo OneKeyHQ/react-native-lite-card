@@ -80,3 +80,5 @@ lib/
 
 # key
 *.secret
+
+.history
