@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "11.0" }
   s.source       = { :git => "https://github.com/OneKeyHQ/react-native-lite-card.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/Classes/**/*" "keys/**/*"
+  s.source_files = "ios/Classes/**/*", "keys/**/*"
   s.vendored_framework = "ios/GPChannelSDKCore.framework"
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.

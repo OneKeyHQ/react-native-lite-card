@@ -39,9 +39,9 @@ typedef NS_ENUM(NSInteger, OKNFCLiteSessionType) {
 };
 
 typedef NS_ENUM(NSInteger, OKNFCLiteStatus) {
-    OKNFCLiteStatusError = -1,
-    OKNFCLiteStatusNewCard = 0,
-    OKNFCLiteStatusActivated = 1,
+    OKNFCLiteStatusError = 1,
+    OKNFCLiteStatusNewCard = 2,
+    OKNFCLiteStatusActivated = 3,
     OKNFCLiteStatusSNNotMatch,
 };
 

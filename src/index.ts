@@ -1,81 +1,25 @@
-import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+import {
+  Linking,
+  NativeEventEmitter,
+  NativeModules,
+  Platform,
+} from 'react-native';
 
-import { CardErrors } from './types';
-
-import type { Callback, CallbackError, CardInfo } from './types';
+import type { CallbackResult, CardInfo, PromiseResult } from './types';
 
 const { OKLiteManager } = NativeModules;
-
-export const LiteFlag = {
-  VERSION: '01',
-  LANGUAGE: '00', // english
-  TAG: 'ffff',
-};
 
 export type NfcConnectUiState = {
   code: number;
   message: string;
 };
 
-const DEFAULT_FUNCTION = (value: string) => value;
-
 class OnekeyLite {
   UiEventEmitter: NativeEventEmitter | null = null;
-
-  mnemonicToEntropy = DEFAULT_FUNCTION;
-
-  entropyToMnemonic = DEFAULT_FUNCTION;
-  entropyToMnemonicV2 = DEFAULT_FUNCTION;
 
   constructor() {
     if (Platform.OS !== 'android') return;
     this.UiEventEmitter = new NativeEventEmitter(OKLiteManager);
-  }
-
-  async encodeMnemonic(
-    version: string,
-    language: string,
-    mnemonic: string
-  ): Promise<string> {
-    const meta = LiteFlag.TAG + version + language;
-    const enMnemonic = await this.mnemonicToEntropy(mnemonic.trim()); // mnemonic to index
-    return enMnemonic + meta;
-  }
-
-  async decodeMnemonic(payload: string) {
-    try {
-      if (payload.length <= 8)
-        return Buffer.from(payload, 'hex').toString().trim();
-
-      const meta = payload.slice(-8);
-
-      const regexp = /^ffff[a-f0-9]{4}$/;
-      if (regexp.test(meta)) {
-        const version = parseInt(meta.slice(4, 6), 10);
-        const enMnemonic = payload.slice(0, -8);
-
-        if (version === 1) {
-          const deMnemonic = await this.entropyToMnemonic(enMnemonic); // mnemonic to index
-
-          return deMnemonic.trim();
-        }
-
-        if (version === 2) {
-          const deMnemonic = await this.entropyToMnemonicV2(enMnemonic); // mnemonic to index
-
-          return deMnemonic.trim();
-        }
-
-        // 当前版本不支持
-        return '';
-      }
-
-      // 兼容 V0 旧版本
-      return Buffer.from(payload, 'hex').toString().trim();
-    } catch (error) {
-      // 数据解析报错
-      return '';
-    }
   }
 
   addConnectListener(listener: (event: NfcConnectUiState) => void) {
@@ -93,52 +37,53 @@ class OnekeyLite {
     return eventEmitter.addListener('nfc_active_connection', () => {});
   }
 
-  getCardName(result: Callback<string>) {
-    OKLiteManager.getCardName(result);
+  getLiteInfo() {
+    return new Promise<PromiseResult<CardInfo>>((resolve) => {
+      OKLiteManager.getLiteInfo(this.convertToPromise(resolve));
+    });
   }
 
-  getLiteInfo(result: Callback<CardInfo>) {
-    OKLiteManager.getLiteInfo(result);
+  checkNFCPermission() {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.checkNFCPermission(this.convertToPromise(resolve));
+    });
   }
 
-  checkNFCPermission(result: Callback<boolean>) {
-    OKLiteManager.checkNFCPermission(result);
-  }
-
-  setMnemonic(
-    mnemonic: string,
-    pwd: string,
-    result: Callback<boolean>,
-    overwrite = false
-  ) {
-    this.encodeMnemonic(LiteFlag.VERSION, LiteFlag.LANGUAGE, mnemonic).then(
-      (payload) => OKLiteManager.setMnemonic(payload, pwd, overwrite, result)
-    );
-  }
-
-  getMnemonicWithPin(pwd: string, result: Callback<string>) {
-    try {
-      OKLiteManager.getMnemonicWithPin(
+  setMnemonic(mnemonic: string, pwd: string, overwrite = false) {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.setMnemonic(
+        mnemonic,
         pwd,
-        async (
-          error: CallbackError | null,
-          data: string | null,
-          state: CardInfo | null
-        ) => {
-          result(error, data ? await this.decodeMnemonic(data) : null, state);
-        }
+        overwrite,
+        this.convertToPromise(resolve)
       );
-    } catch (error) {
-      result({ code: CardErrors.ExecFailure, message: null }, null, null);
-    }
+    });
   }
 
-  changePin(oldPin: string, newPin: string, result: Callback<boolean>) {
-    OKLiteManager.changePin(oldPin, newPin, result);
+  getMnemonicWithPin(pwd: string) {
+    return new Promise<PromiseResult<string>>((resolve) => {
+      OKLiteManager.getMnemonicWithPin(pwd, this.convertToPromise(resolve));
+    });
   }
 
-  reset(result: Callback<boolean>) {
-    OKLiteManager.reset(result);
+  changePin(oldPin: string, newPin: string) {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.changePin(oldPin, newPin, this.convertToPromise(resolve));
+    });
+  }
+
+  reset() {
+    return new Promise<PromiseResult<boolean>>((resolve) => {
+      OKLiteManager.reset(this.convertToPromise(resolve));
+    });
+  }
+
+  convertToPromise<T>(
+    resolve: (value: PromiseResult<T> | PromiseLike<PromiseResult<T>>) => void
+  ) {
+    return (...result: CallbackResult<T>) => {
+      resolve({ error: result[0], data: result[1], cardInfo: result[2] });
+    };
   }
 
   cancel() {
@@ -146,7 +91,11 @@ class OnekeyLite {
   }
 
   intoSetting() {
-    if (Platform.OS === 'android') OKLiteManager.intoSetting();
+    if (Platform.OS === 'android') {
+      OKLiteManager.intoSetting();
+    } else {
+      Linking.openSettings();
+    }
   }
 }
 
