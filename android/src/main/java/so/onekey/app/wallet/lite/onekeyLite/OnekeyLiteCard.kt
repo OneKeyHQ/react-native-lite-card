@@ -39,7 +39,7 @@ object OneKeyLiteCard {
 
             NfcPermissionUtils.checkPermission(activity) {
                 printLog(TAG, "startNfc Have permission")
-                if (!activity.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
+                if (!activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                     return@checkPermission
                 }
 

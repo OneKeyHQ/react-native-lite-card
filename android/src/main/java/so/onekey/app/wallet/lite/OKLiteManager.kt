@@ -323,18 +323,20 @@ class OKLiteManager(private val context: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun getLiteInfo(callback: Callback) = launch {
-        Log.d(TAG, "getLiteInfo")
-        handleOperation(callback) { isoDep ->
-            Log.e(TAG, "getLiteInfo Obtain the device")
-            val cardInfo = OneKeyLiteCard.getCardInfo(isoDep)
-            Log.e(TAG, "getLiteInfo result $cardInfo")
-            cardInfo.createArguments()
+    fun getLiteInfo(callback: Callback) {
+        launch {
+            Log.d(TAG, "getLiteInfo")
+            handleOperation(callback) { isoDep ->
+                Log.e(TAG, "getLiteInfo Obtain the device")
+                val cardInfo = OneKeyLiteCard.getCardInfo(isoDep)
+                Log.e(TAG, "getLiteInfo result $cardInfo")
+                cardInfo.createArguments()
+            }
         }
     }
 
     @ReactMethod
-    fun setMnemonic(mnemonic: String, pwd: String, overwrite: Boolean, callback: Callback) =
+    fun setMnemonic(mnemonic: String, pwd: String, overwrite: Boolean, callback: Callback) {
         launch {
             handleOperation(callback) { isoDep ->
                 Log.e(TAG, "setMnemonic Obtain the device")
@@ -345,22 +347,27 @@ class OKLiteManager(private val context: ReactApplicationContext) :
                 true
             }
         }
+    }
 
     @ReactMethod
-    fun getMnemonicWithPin(pwd: String, callback: Callback) = launch {
-        Log.d(TAG, "getMnemonicWithPin")
-        handleOperation(callback) { isoDep ->
-            Log.e(TAG, "getMnemonicWithPin Obtain the device")
-            OneKeyLiteCard.getMnemonicWithPin(mCurrentCardState, isoDep, pwd)
+    fun getMnemonicWithPin(pwd: String, callback: Callback) {
+        launch {
+            Log.d(TAG, "getMnemonicWithPin")
+            handleOperation(callback) { isoDep ->
+                Log.e(TAG, "getMnemonicWithPin Obtain the device")
+                OneKeyLiteCard.getMnemonicWithPin(mCurrentCardState, isoDep, pwd)
+            }
         }
     }
 
     @ReactMethod
-    fun changePin(oldPwd: String, newPwd: String, callback: Callback) = launch {
-        Log.d(TAG, "changePin")
-        handleOperation(callback) { isoDep ->
-            Log.e(TAG, "changePin Obtain the device")
-            OneKeyLiteCard.changPin(mCurrentCardState, isoDep, oldPwd, newPwd)
+    fun changePin(oldPwd: String, newPwd: String, callback: Callback) {
+        launch {
+            Log.d(TAG, "changePin")
+            handleOperation(callback) { isoDep ->
+                Log.e(TAG, "changePin Obtain the device")
+                OneKeyLiteCard.changPin(mCurrentCardState, isoDep, oldPwd, newPwd)
+            }
         }
     }
 
@@ -396,22 +403,26 @@ class OKLiteManager(private val context: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun reset(callback: Callback) = launch {
-        Log.d(TAG, "reset")
-        handleOperation(callback) { isoDep ->
-            Log.e(TAG, "reset Obtain the device")
-            val isSuccess = OneKeyLiteCard.reset(isoDep)
-            if (!isSuccess) throw NFCExceptions.ExecFailureException()
-            Log.e(TAG, "reset result success")
-            true
+    fun reset(callback: Callback) {
+        launch {
+            Log.d(TAG, "reset")
+            handleOperation(callback) { isoDep ->
+                Log.e(TAG, "reset Obtain the device")
+                val isSuccess = OneKeyLiteCard.reset(isoDep)
+                if (!isSuccess) throw NFCExceptions.ExecFailureException()
+                Log.e(TAG, "reset result success")
+                true
+            }
         }
     }
 
     @ReactMethod
-    fun intoSetting() = launch {
-        Log.d(TAG, "intoSetting")
-        Utils.getTopActivity()?.let {
-            NfcUtils.intentToNfcSetting(it)
+    fun intoSetting() {
+        launch {
+            Log.d(TAG, "intoSetting")
+            Utils.getTopActivity()?.let {
+                NfcUtils.intentToNfcSetting(it)
+            }
         }
     }
 }
