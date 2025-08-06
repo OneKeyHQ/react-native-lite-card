@@ -345,7 +345,7 @@ public final class Utils {
         }
 
         private void setTopActivity(final Activity activity) {
-            if (activity == null) {
+            if (activity == null || mActivityList == null) {
                 return;
             }
             if (mActivityList.contains(activity)) {
