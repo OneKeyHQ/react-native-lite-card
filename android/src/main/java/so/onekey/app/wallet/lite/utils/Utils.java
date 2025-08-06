@@ -345,8 +345,12 @@ public final class Utils {
         }
 
         private void setTopActivity(final Activity activity) {
+            if (activity == null || mActivityList == null) {
+                return;
+            }
             if (mActivityList.contains(activity)) {
-                if (!mActivityList.getLast().equals(activity)) {
+                Activity lastActivity = mActivityList.getLast();
+                if (lastActivity != null && !lastActivity.equals(activity)) {
                     mActivityList.remove(activity);
                     mActivityList.addLast(activity);
                 }
