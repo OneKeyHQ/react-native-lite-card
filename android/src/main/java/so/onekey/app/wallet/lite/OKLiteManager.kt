@@ -52,9 +52,12 @@ class OKLiteManager(private val context: ReactApplicationContext) :
     private var mCurrentCardState: CardState? = null
 
     private val mActivityEventListener = object : BaseActivityEventListener() {
-        override fun onNewIntent(intent: Intent?) {
+        override fun onNewIntent(intent: Intent) {
             super.onNewIntent(intent)
-            val action = intent?.action
+            val action = intent.action
+            if (action == null) {
+                return
+            }
             if ((action == NfcAdapter.ACTION_NDEF_DISCOVERED)
                 || action == NfcAdapter.ACTION_TECH_DISCOVERED
                 || action == NfcAdapter.ACTION_TAG_DISCOVERED
