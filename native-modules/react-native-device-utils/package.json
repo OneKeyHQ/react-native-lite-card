@@ -1,7 +1,7 @@
 {
-  "name": "@onekeyfe/react-native-get-random-values",
+  "name": "@onekeyfe/react-native-device-utils",
   "version": "1.1.11",
-  "description": "react-native-get-random-values",
+  "description": "react-native-device-utils",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -34,7 +34,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-get-random-values-example",
+    "example": "yarn workspace react-native-device-utils-example",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "nitrogen": "nitrogen",
@@ -50,14 +50,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OneKeyHQ/app-modules/react-native-get-random-values.git"
+    "url": "git+https://github.com/OneKeyHQ/app-modules/react-native-device-utils.git"
   },
   "author": "onekeyfe <huanming@onekey.so> (https://github.com/OneKeyHQ/app-modules)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/OneKeyHQ/app-modules/react-native-get-random-values/issues"
+    "url": "https://github.com/OneKeyHQ/app-modules/react-native-device-utils/issues"
   },
-  "homepage": "https://github.com/OneKeyHQ/app-modules/react-native-get-random-values#readme",
+  "homepage": "https://github.com/OneKeyHQ/app-modules/react-native-device-utils#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
